@@ -4,6 +4,7 @@ import { PairCreated } from '../types/Factory/Factory'
 import { Pair as PairTemplate } from '../types/templates'
 import { Candle, Pair, Token } from '../types/schema'
 import { fetchTokenDecimals, fetchTokenName } from './helpers'
+import { concat } from '@graphprotocol/graph-ts/helper-functions'
 
 function getOrCreateToken(tokenAddr: string): Token {
     let t = Token.load(tokenAddr);
@@ -52,17 +53,16 @@ export function handleSwap(event: Swap): void {
     let token0AmountDec = token0Amount.divDecimal(x.toBigDecimal());
     let token1AmountDec = token1Amount.divDecimal(y.toBigDecimal());
     let price = token0AmountDec.div(token1AmountDec);
-    let tokens = pair.token0.concat(pair.token1);
+    let tokens = concat(Bytes.fromHexString(pair.token0), Bytes.fromHexString(pair.token1));
     let timestamp = event.block.timestamp.toI32();
 
     let periods: i32[] = [1 * 60, 5 * 60, 10 * 60, 15 * 60, 30 * 60, 60 * 60, 4 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60, 7 * 24 * 60 * 60];
     for (let i = 0; i < periods.length; i++) {
-        let timeId = Bytes.fromI32(timestamp / periods[i]).toString();
-        let periodId = Bytes.fromI32(periods[i]).toString();
-        let candleId = timeId.concat(periodId).concat(tokens);
-        let candle = Candle.load(candleId);
+        let time_id = timestamp / periods[i];
+        let candle_id = concat(concat(Bytes.fromI32(time_id), Bytes.fromI32(periods[i])), tokens).toHex();
+        let candle = Candle.load(candle_id);
         if (candle === null) {
-            candle = new Candle(candleId);
+            candle = new Candle(candle_id);
             candle.time = timestamp;
             candle.period = periods[i];
             candle.token0 = pair.token0;
