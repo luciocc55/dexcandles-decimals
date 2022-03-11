@@ -24,7 +24,6 @@ export function handleNewPair(event: PairCreated): void {
     let pair = new Pair(event.params.pair.toHex());
     pair.token0 = getOrCreateToken(event.params.token0.toHexString()).id;
     pair.token1 = getOrCreateToken(event.params.token1.toHexString()).id;
-    pair.factory = '0xEF45d134b73241eDa7703fa787148D9C9F4950b0';
     pair.token0Decimals = fetchTokenDecimals(pair.token0);
     pair.token1Decimals = fetchTokenDecimals(pair.token1);
     if (pair.token0Decimals === null ||

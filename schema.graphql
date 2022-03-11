@@ -11,7 +11,6 @@ type Pair @entity {
     token1: Token!
     token0Decimals: Int!
     token1Decimals: Int!
-    factory: ID! #factory address
 }
 
 type Candle @entity {
